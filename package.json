@@ -1,0 +1,39 @@
+{
+  "name": "auto-insurance-platform",
+  "version": "1.0.0",
+  "description": "Production-ready auto insurance lead generation platform",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "insurance",
+    "lead-generation",
+    "nextjs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "better-sqlite3": "^12.9.0",
+    "next": "^16.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.4",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.3"
+  }
+}
