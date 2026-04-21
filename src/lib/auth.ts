@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 const cookieName = "admin_session";
 
 function getSecret(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET;
+  const secret = process.env.ADMIN_SESSION_SECRET?.trim();
   if (!secret) {
     throw new Error("Missing ADMIN_SESSION_SECRET environment variable");
   }
@@ -51,9 +51,9 @@ export async function isAdminAuthenticated(): Promise<boolean> {
 }
 
 export function isValidAdminPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
   if (!adminPassword) {
     throw new Error("Missing ADMIN_PASSWORD environment variable");
   }
-  return password === adminPassword;
+  return password.trim() === adminPassword;
 }
