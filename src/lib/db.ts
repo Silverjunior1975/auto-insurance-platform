@@ -1,4 +1,6 @@
-import Database from "better-sqlite3";
+import type DatabaseCtor from "better-sqlite3";
+
+type SqliteDatabase = InstanceType<typeof DatabaseCtor>;
 import { neon } from "@neondatabase/serverless";
 import { mkdirSync } from "fs";
 import { existsSync } from "fs";
@@ -14,17 +16,24 @@ const sql = databaseUrl ? neon(databaseUrl) : null;
 
 let postgresReady: Promise<void> | null = null;
 let sqliteReady = false;
+let sqliteDb: SqliteDatabase | null = null;
 
-function ensureSqliteDb(): Database.Database {
+async function ensureSqliteDb(): Promise<SqliteDatabase> {
   if (process.env.NODE_ENV === "production") {
     throw new Error("DATABASE_URL is required in production. Configure Postgres for deployed environments.");
   }
+
+  if (sqliteDb) {
+    return sqliteDb;
+  }
+
+  const { default: BetterSqlite } = await import("better-sqlite3");
 
   if (!existsSync(dataDir)) {
     mkdirSync(dataDir, { recursive: true });
   }
 
-  const db = new Database(dbFile);
+  const db = new BetterSqlite(dbFile);
   if (!sqliteReady) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS leads (
@@ -44,6 +53,7 @@ function ensureSqliteDb(): Database.Database {
     `);
     sqliteReady = true;
   }
+  sqliteDb = db;
   return db;
 }
 
@@ -129,7 +139,7 @@ export async function createLead(input: LeadInput): Promise<number> {
     return rows[0].id;
   }
 
-  const db = ensureSqliteDb();
+  const db = await ensureSqliteDb();
   const stmt = db.prepare(`
       INSERT INTO leads (
         full_name,
@@ -181,7 +191,7 @@ export async function getLeads(): Promise<Lead[]> {
     return rows.map((row) => ({ ...row, createdAt: new Date(row.createdAt).toISOString() })) as Lead[];
   }
 
-  const db = ensureSqliteDb();
+  const db = await ensureSqliteDb();
   const stmt = db.prepare(`${leadSelect} ORDER BY datetime(created_at) DESC, id DESC`);
   return stmt.all() as Lead[];
 }
@@ -193,7 +203,7 @@ export async function updateLeadStatus(id: number, status: LeadStatus): Promise<
     return;
   }
 
-  const db = ensureSqliteDb();
+  const db = await ensureSqliteDb();
   const stmt = db.prepare("UPDATE leads SET status = ? WHERE id = ?");
   stmt.run(status, id);
 }
